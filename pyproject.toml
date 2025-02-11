@@ -1,33 +1,49 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "template-python"
+name = "maxtexlib"
 version = "0.1"
-description = "Template python repository."
 readme = "README.md"
-requires-python = ">=3.8"
-license = {file = "LICENSE.txt"}
-keywords = ["python"]
-authors = [{name = "Max"}]
-classifiers = [
-    "Development Status :: 3 - Alpha",
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+  { name = "Max Lindqvist"},
+  { email = "max.lindqvist@ipp.mpg.de"}
 ]
+description = "A simple template for generating reports with LaTeX and figures with maxplotlib"
+keywords = ["LaTeX, template"]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    ]
+
 dependencies = [
-    "black",
-    "isort",
-    "pytest",
+    'pyyaml',
+    'maxtikzlib @ git+https://github.com/max-models/maxtikzlib.git@main',
+    'maxplotlib @ git+https://github.com/max-models/maxplotlib.git@main',
 ]
 
-[project.optional-dependencies]
-dev = ["check-manifest"]
-test = ["coverage"]
+
 [project.urls]
-"Source" = "https://github.com/max-models/template-python"
+# homepage = ""
+# documentation = ""
+repository = "https://gitlab.mpcdf.mpg.de/maxlin/template-latex"
+# changelog = ""
+# "Bug Tracker" = ""
+
+[tool.setuptools]
+include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [project.scripts]
-template-python = "app.main:main"
+maxtexlib = "maxtexlib.main:main"
+
+[tool.setuptools.package-data]
+"maxtexlib.templates" = ["*.tex", "makefile", "tex/*.tex", "figures/*.py"]
+
+[tool.ruff]
+line-length=120

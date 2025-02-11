@@ -1,8 +1,7 @@
 def test_import_app():
-    from app.main import main
+    import maxtexlib
 
-    print("app imported")
-    main()
+    print("maxtexlib imported")
 
 
 if __name__ == "__main__":
