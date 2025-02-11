@@ -56,8 +56,8 @@ jobs:
       - name: Check installation
         run: |
           source env/bin/activate
-          pip list | grep maxtex
-          which maxtex
+          pip list | grep maxtexlib
+          which maxtexlib
           maxtexlib -h
 
       # Run tests
