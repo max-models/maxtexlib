@@ -49,7 +49,7 @@ jobs:
           maxtexlib -h
 
       # Run tests
-      - name: Run tests
+      - name: Run unit tests
         run: |
           source env/bin/activate
           pytest .
@@ -57,14 +57,14 @@ jobs:
           CI: true
 
       # Run template project
-      - name: Run tests
+      - name: Run template project
         run: |
           source env/bin/activate
-          maxtex --new ci_project
-          maxtex --project ci_project --path test_project
-          maxtex --project ci_project --generate-project-template -y
-          maxtex --project ci_project --generate-figures
-          maxtex --project ci_project --compile
+          maxtexlib --new ci_project
+          maxtexlib --project ci_project --path test_project
+          maxtexlib --project ci_project --generate-project-template -y
+          maxtexlib --project ci_project --generate-figures
+          maxtexlib --project ci_project --compile
         env:
           CI: true
         
