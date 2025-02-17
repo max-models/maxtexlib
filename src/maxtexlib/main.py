@@ -25,28 +25,34 @@ def run_python_files(directory):
         subprocess.run(["python3", file_path], check=True, cwd=directory)
 
 
+def question_yes_no(question, yes=False):
+    if yes:
+        return True
+    response = input(f"{question} (Y/n): ").strip().lower()
+    if response not in ("y", "yes", ""):
+        print("Operation canceled.")
+        return False
+    return True
+
+
 def copy_template_files(sources, destination, yes=False):
-    print(sources)
     for source in glob.glob(str(sources)):
-        if os.path.exists(destination) and not yes:
-            response = (
-                input(f"File '{destination}' already exists. Overwrite? (Y/n): ")
-                .strip()
-                .lower()
-            )
-            if response not in ("y", "yes", ""):
-                print("Operation canceled.")
-                return
-        shutil.copy(str(source), destination)
+        if os.path.exists(destination):
+            if question_yes_no(
+                f"File '{os.path.basename(source)}' already exists. Overwrite?", yes=yes
+            ):
+                shutil.copy(str(source), destination)
+        else:
+            shutil.copy(str(source), destination)
 
 
 def setup_template(project_name, config, yes=False):
     """Copy main.tex from package templates to project directory, asking for confirmation if it exists."""
-
+    print("yoo")
     # Paths
     project_path = config.get_path_project(project_name)
-    main_tex_path = os.path.join(project_path, "main.tex")
-    makefile_path = os.path.join(project_path, "makefile")
+    main_tex_path = os.path.join(project_path, "main_template.tex")
+    makefile_path = os.path.join(project_path, "makefile_template")
     path_figures = os.path.join(project_path, "figures")
     path_texfiles = os.path.join(project_path, "tex")
 
@@ -56,12 +62,15 @@ def setup_template(project_name, config, yes=False):
     os.makedirs(path_texfiles, exist_ok=True)
 
     # Create main.tex
-    source_path = importlib.resources.files("maxtexlib.templates").joinpath("main.tex")
+    source_path = importlib.resources.files("maxtexlib.templates").joinpath(
+        "main_template.tex"
+    )
     copy_template_files(sources=source_path, destination=main_tex_path, yes=yes)
-    config.set_path_texfile(project_name, main_tex_path)
 
     # Create makefile
-    source_path = importlib.resources.files("maxtexlib.templates").joinpath("makefile")
+    source_path = importlib.resources.files("maxtexlib.templates").joinpath(
+        "makefile_template"
+    )
     copy_template_files(sources=source_path, destination=makefile_path, yes=yes)
     # config.set_path_makefile(project_name, makefile_path)
 
@@ -70,14 +79,17 @@ def setup_template(project_name, config, yes=False):
         "figures/*.py"
     )
     copy_template_files(sources=source_path, destination=path_figures, yes=yes)
-    config.set_path_figures(project_name, path_figures)
 
     # Copy tex/
     source_path = importlib.resources.files("maxtexlib.templates").joinpath("tex/*.tex")
     copy_template_files(sources=source_path, destination=path_texfiles, yes=yes)
 
+    if question_yes_no("Update projects path to the templates?", yes=yes):
+        config.set_path_texfile(project_name, main_tex_path)
+        config.set_path_figures(project_name, path_figures)
+
     print(f"Template created in {project_path}")
-    print(f"Config for project: {config.projects[project_name]}")
+    print(f"Config for project:\n{config.projects[project_name]}")
 
     config.save()
 
@@ -94,7 +106,7 @@ def main():
     parser.add_argument("-pr", "--project", dest="PROJECT", type=str, help="")
 
     parser.add_argument(
-        "-p", "--path", dest="PATH", type=str, help="Set path to LaTeX project"
+        "--path", dest="PATH", type=str, help="Set path to LaTeX project"
     )
 
     parser.add_argument(
@@ -123,6 +135,8 @@ def main():
 
     parser.add_argument("-d", "--delete", action="store_true", help="Delete project")
 
+    parser.add_argument("--show-config", action="store_true", help="Show config")
+
     parser.add_argument(
         "-y", "--yes", action="store_true", help="Answer yes when asked"
     )
@@ -136,7 +150,7 @@ def main():
         config.save()
     elif args.PROJECT:
         PROJECT_NAME = args.PROJECT
-
+    print("setup_template", PROJECT_NAME)
     if PROJECT_NAME is not None:
         if args.figdir:
             config.set_path_figures(PROJECT_NAME, args.figdir)
@@ -149,6 +163,7 @@ def main():
             config.save()
 
         if args.GENERATE_TEMPLATE:
+            print("setup_template")
             setup_template(PROJECT_NAME, config, args.yes)
         if args.generate_figures:
             print("Generating figures for the LaTeX project...")
@@ -174,6 +189,9 @@ def main():
         if args.delete:
             config.delete_project(PROJECT_NAME)
             config.save()
+
+    if args.show_config:
+        print(config)
 
 
 if __name__ == "__main__":

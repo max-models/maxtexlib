@@ -15,10 +15,18 @@ class LatexProject:
     path_figures: str = None
     path_texfile: str = None
 
+    def __str__(self) -> str:
+        ret = ""
+        ret += f"Project path: {self.path_project}\n"
+        ret += f"Figure path: {self.path_figures}\n"
+        ret += f"Texfiles path: {self.path_texfile}\n"
+        return ret
+
 
 @dataclass
 class Config:
     projects: Dict[str, LatexProject] = field(default_factory=dict)
+    path_config: str = PATH_CONFIG
 
     @classmethod
     def load(cls, file_path=PATH_CONFIG) -> "Config":
@@ -26,7 +34,7 @@ class Config:
         if not os.path.exists(file_path):
             # Create an empty JSON file
             with open(file_path, "w") as file:
-                json.dump({"projects": {}}, file, indent=4)
+                json.dump({"projects": {}, "path_config": file_path}, file, indent=4)
             return cls()  # Return a default empty config
 
         with open(file_path, "r") as file:
@@ -35,7 +43,8 @@ class Config:
                 name: LatexProject(**proj)
                 for name, proj in data.get("projects", {}).items()
             }
-            return cls(projects=projects)
+            path_config = data.get("path_config", {})
+            return cls(projects=projects, path_config=path_config)
 
     def save(self, file_path=PATH_CONFIG) -> None:
         """Save the configuration to a JSON file."""
@@ -44,7 +53,8 @@ class Config:
                 {
                     "projects": {
                         name: asdict(proj) for name, proj in self.projects.items()
-                    }
+                    },
+                    "path_config": file_path,
                 },
                 file,
                 indent=4,
@@ -101,6 +111,15 @@ class Config:
         if project not in self.projects:
             raise ValueError(f"Project '{project}' doesn't exist.")
         self.projects[project].path_texfile = os.path.abspath(path_texfile)
+
+    def __str__(self) -> str:
+
+        ret = f"Path to config: {self.path_config}\n"
+        for name, project in self.projects.items():
+            ret += "=" * 10 + "\n"
+            ret += f"Project: {name}\n"
+            ret += f"{project}\n"
+        return ret
 
 
 if __name__ == "__main__":

@@ -75,6 +75,7 @@ jobs:
           maxtexlib --new ci_project
           maxtexlib --project ci_project --path test_project
           maxtexlib --project ci_project --generate-project-template -y
+          maxtexlib --show-config
           maxtexlib --project ci_project --generate-figures
           maxtexlib --project ci_project --compile
         env:
